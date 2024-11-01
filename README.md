@@ -1,3 +1,5 @@
+## Meus Pedidos App
+
 Aplicativo para gerenciamento simples e rápido de uma fila de pedidos de qualquer tipo. O objetivo é organizar e facilitar o acompanhamento de pedidos em estabelecimentos simples e/ou informais. Desde um quisque de praia, até uma barraca de cachorro quente na rua. Com ou sem internet disponível. E principalmente, de forma gratuita.
 
 ###### Into the project directory...
