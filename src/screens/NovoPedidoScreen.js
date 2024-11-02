@@ -11,30 +11,28 @@ import {
 } from "react-native";
 import { MaskedTextInput } from "react-native-mask-text";
 import { saveData, getData } from "../services/StorageService";
+import { solicitarCompartilhamento } from "../services/ShareService";
 
 export default function NovoPedidoScreen({ navigation }) {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [itensDisponiveis, setItensDisponiveis] = useState([]);
   const [itensSelecionados, setItensSelecionados] = useState([]);
+  const [notificar, setNotificar] = useState(false);
 
   useEffect(() => {
-    const fetchItens = async () => {
+    const fetchConfig = async () => {
+      const storedNotificar = await getData("notificar");
+      setNotificar(storedNotificar || false);
       const storedItens = await getData("itens");
-      setItensDisponiveis(storedItens || []); // sempre fornece um array
+      setItensDisponiveis(storedItens || []);
     };
-    fetchItens();
+    fetchConfig();
   }, []);
 
   const selecionarItem = (item) => {
     const itemDuplicado = { ...item, uniqueId: Date.now().toString() };
     setItensSelecionados([...itensSelecionados, itemDuplicado]);
-  };
-
-  const removerItemSelecionado = (uniqueId) => {
-    setItensSelecionados(
-      itensSelecionados.filter((item) => item.uniqueId !== uniqueId)
-    );
   };
 
   const adicionarPedido = async () => {
@@ -55,8 +53,13 @@ export default function NovoPedidoScreen({ navigation }) {
     };
 
     await saveData("pedidos", [...pedidosExistentes, novoPedido]);
-
     Alert.alert("Sucesso", `Pedido #${numeroPedido} adicionado.`);
+
+    // Se a notificação estiver ativada e o telefone for válido, perguntar se deseja notificar
+    if (notificar && telefone) {
+      solicitarCompartilhamento(novoPedido, "Seu pedido foi criado:");
+    }
+
     navigation.goBack();
   };
 

@@ -1,8 +1,27 @@
-import React from "react";
-import { View, Text, Button, Alert } from "react-native";
-import { saveData, removeData } from "../services/StorageService";
+import React, { useState, useEffect } from "react";
+import { View, Text, Button, Alert, Switch, StyleSheet } from "react-native";
+import { saveData, getData, removeData } from "../services/StorageService";
 
 export default function ConfiguracoesScreen() {
+  const [notificar, setNotificar] = useState(false);
+
+  // Carrega o estado atual da configuração de notificação
+  useEffect(() => {
+    const fetchConfig = async () => {
+      const storedNotificar = await getData("notificar");
+      setNotificar(storedNotificar || false);
+    };
+    fetchConfig();
+  }, []);
+
+  // Alterna o estado de notificação e salva a nova configuração
+  const toggleNotificar = async () => {
+    const novoValor = !notificar;
+    setNotificar(novoValor);
+    await saveData("notificar", novoValor);
+  };
+
+  // Função para limpar todos os pedidos e reiniciar o contador
   const limparPedidos = async () => {
     Alert.alert(
       "Confirmar Ação",
@@ -23,6 +42,7 @@ export default function ConfiguracoesScreen() {
     );
   };
 
+  // Função para limpar todos os itens
   const limparItens = async () => {
     Alert.alert(
       "Confirmar Ação",
@@ -41,8 +61,16 @@ export default function ConfiguracoesScreen() {
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 20, marginBottom: 20 }}>Configurações</Text>
+    <View style={styles.container}>
+      <Text style={styles.headerText}>Configurações</Text>
+
+      {/* Opção de Notificação Automática */}
+      <View style={styles.switchContainer}>
+        <Text>Notificar Cliente ao Criar/Concluir Pedido</Text>
+        <Switch value={notificar} onValueChange={toggleNotificar} />
+      </View>
+
+      {/* Botões de Limpeza */}
       <Button
         title="Limpar Todos os Pedidos"
         onPress={limparPedidos}
@@ -52,8 +80,28 @@ export default function ConfiguracoesScreen() {
         title="Limpar Todos os Itens"
         onPress={limparItens}
         color="orange"
-        style={{ marginTop: 20 }}
+        style={styles.buttonSpacing}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  headerText: {
+    fontSize: 20,
+    marginBottom: 20,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  buttonSpacing: {
+    marginTop: 10,
+  },
+});

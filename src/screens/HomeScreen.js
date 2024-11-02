@@ -10,15 +10,18 @@ import {
 } from "react-native";
 import { saveData, getData, removeData } from "../services/StorageService";
 import { useIsFocused } from "@react-navigation/native";
+import { solicitarCompartilhamento } from "../services/ShareService";
 
 export default function HomeScreen({ navigation }) {
   const [pedidos, setPedidos] = useState([]);
+  const [notificar, setNotificar] = useState(false);
   const isFocused = useIsFocused(); // Detecta o foco na tela
 
   const fetchPedidos = async () => {
     const storedPedidos = await getData("pedidos");
-    setPedidos((storedPedidos || []).reverse()); // Se estiver vazio, seta um array vazio
-    // .reverse para inverter a ordem, exibirá o mais recente primeiro
+    const storedNotificar = await getData("notificar"); // Carrega configuração de notificação
+    setNotificar(storedNotificar || false); // Define se notificações estão ativadas
+    setPedidos((storedPedidos || []).reverse()); // Exibe pedidos mais recentes primeiro
   };
 
   useEffect(() => {
@@ -26,6 +29,24 @@ export default function HomeScreen({ navigation }) {
       fetchPedidos();
     }
   }, [isFocused]);
+
+  const handleConcluir = async (id) => {
+    const updatedPedidos = pedidos.map((p) =>
+      p.id === id ? { ...p, status: "Concluído" } : p
+    );
+    setPedidos(updatedPedidos);
+    await saveData("pedidos", updatedPedidos);
+
+    const pedido = updatedPedidos.find((p) => p.id === id);
+
+    // Verifica se a notificação está ativada e se o telefone está preenchido
+    if (notificar && pedido.telefone) {
+      solicitarCompartilhamento(
+        pedido,
+        "Seu pedido foi concluído e aguarda retirada:"
+      );
+    }
+  };
 
   const concluirPedido = async (id) => {
     Alert.alert(
@@ -36,14 +57,6 @@ export default function HomeScreen({ navigation }) {
         { text: "Concluir", onPress: () => handleConcluir(id) },
       ]
     );
-  };
-
-  const handleConcluir = async (id) => {
-    const updatedPedidos = pedidos.map((p) =>
-      p.id === id ? { ...p, status: "Concluído" } : p
-    );
-    setPedidos(updatedPedidos);
-    await saveData("pedidos", updatedPedidos);
   };
 
   const cancelarPedido = async (id) => {
