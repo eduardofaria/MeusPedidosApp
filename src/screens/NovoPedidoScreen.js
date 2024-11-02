@@ -35,9 +35,16 @@ export default function NovoPedidoScreen({ navigation }) {
     setItensSelecionados([...itensSelecionados, itemDuplicado]);
   };
 
+  const removerItemSelecionado = (uniqueId) => {
+    setItensSelecionados(
+      itensSelecionados.filter((item) => item.uniqueId !== uniqueId)
+    );
+  };
+
   const adicionarPedido = async () => {
-    if (telefone && telefone.replace(/[^0-9]/g, "").length < 11) {
-      Alert.alert("Erro", "O telefone deve ter o formato (XX) XXXXX-XXXX.");
+    // Validação de telefone com código do país
+    if (telefone && telefone.replace(/\D/g, "").length < 13) {
+      Alert.alert("Erro", "O telefone deve ter o formato +99(99) 99999-9999.");
       return;
     }
 
@@ -75,7 +82,7 @@ export default function NovoPedidoScreen({ navigation }) {
 
       <Text style={styles.label}>Telefone</Text>
       <MaskedTextInput
-        mask="(99) 99999-9999"
+        mask="+99(99) 99999-9999"
         placeholder="Telefone"
         keyboardType="numeric"
         value={telefone}
