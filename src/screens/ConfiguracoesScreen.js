@@ -1,27 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, Alert, Switch, StyleSheet } from "react-native";
+import { MaskedTextInput } from "react-native-mask-text";
 import { saveData, getData, removeData } from "../services/StorageService";
 
 export default function ConfiguracoesScreen() {
   const [notificar, setNotificar] = useState(false);
+  const [codigoPais, setCodigoPais] = useState("+55"); // Brasil como padrão
 
-  // Carrega o estado atual da configuração de notificação
+  // Carrega o estado atual da configuração
   useEffect(() => {
     const fetchConfig = async () => {
       const storedNotificar = await getData("notificar");
+      const storedCodigoPais = (await getData("codigoPais")) || "+55"; // Carrega o código do país, Brasil como padrão
       setNotificar(storedNotificar || false);
+      setCodigoPais(storedCodigoPais);
     };
     fetchConfig();
   }, []);
 
-  // Alterna o estado de notificação e salva a nova configuração
   const toggleNotificar = async () => {
     const novoValor = !notificar;
     setNotificar(novoValor);
     await saveData("notificar", novoValor);
   };
 
-  // Função para limpar todos os pedidos e reiniciar o contador
+  const salvarCodigoPais = async (novoCodigo) => {
+    setCodigoPais(novoCodigo);
+    await saveData("codigoPais", novoCodigo);
+  };
+
   const limparPedidos = async () => {
     Alert.alert(
       "Confirmar Ação",
@@ -42,7 +49,6 @@ export default function ConfiguracoesScreen() {
     );
   };
 
-  // Função para limpar todos os itens
   const limparItens = async () => {
     Alert.alert(
       "Confirmar Ação",
@@ -69,6 +75,16 @@ export default function ConfiguracoesScreen() {
         <Text>Notificar Cliente ao Criar/Concluir Pedido</Text>
         <Switch value={notificar} onValueChange={toggleNotificar} />
       </View>
+
+      {/* Campo para configurar o código do país */}
+      <Text style={styles.label}>Código do País</Text>
+      <MaskedTextInput
+        mask="+999"
+        keyboardType="numeric"
+        value={codigoPais}
+        onChangeText={salvarCodigoPais}
+        style={styles.input}
+      />
 
       {/* Botões de Limpeza */}
       <Button
@@ -100,6 +116,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginVertical: 10,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginVertical: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
   },
   buttonSpacing: {
     marginTop: 10,

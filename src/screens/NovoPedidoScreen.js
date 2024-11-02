@@ -16,6 +16,7 @@ import { solicitarCompartilhamento } from "../services/ShareService";
 export default function NovoPedidoScreen({ navigation }) {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [codigoPais, setCodigoPais] = useState("+55"); // Carrega o código do Brasil por padrão
   const [itensDisponiveis, setItensDisponiveis] = useState([]);
   const [itensSelecionados, setItensSelecionados] = useState([]);
   const [notificar, setNotificar] = useState(false);
@@ -23,7 +24,10 @@ export default function NovoPedidoScreen({ navigation }) {
   useEffect(() => {
     const fetchConfig = async () => {
       const storedNotificar = await getData("notificar");
+      const storedCodigoPais = (await getData("codigoPais")) || "+55"; // Carrega o código do país salvo
       setNotificar(storedNotificar || false);
+      setCodigoPais(storedCodigoPais);
+
       const storedItens = await getData("itens");
       setItensDisponiveis(storedItens || []);
     };
@@ -42,9 +46,9 @@ export default function NovoPedidoScreen({ navigation }) {
   };
 
   const adicionarPedido = async () => {
-    // Validação de telefone com código do país
-    if (telefone && telefone.replace(/\D/g, "").length < 13) {
-      Alert.alert("Erro", "O telefone deve ter o formato +99(99) 99999-9999.");
+    if (telefone && telefone.replace(/\D/g, "").length < 10) {
+      // DDD + número completo
+      Alert.alert("Erro", "O telefone deve ter o formato (99) 99999-9999.");
       return;
     }
 
@@ -54,7 +58,7 @@ export default function NovoPedidoScreen({ navigation }) {
       id: Date.now(),
       numero: numeroPedido.toString().padStart(3, "0"),
       nome: nome || "Cliente Anônimo",
-      telefone,
+      telefone: `${codigoPais}${telefone}`, // Salva o telefone completo com o código do país
       itens: itensSelecionados,
       status: "Pendente",
     };
@@ -62,7 +66,6 @@ export default function NovoPedidoScreen({ navigation }) {
     await saveData("pedidos", [...pedidosExistentes, novoPedido]);
     Alert.alert("Sucesso", `Pedido #${numeroPedido} adicionado.`);
 
-    // Se a notificação estiver ativada e o telefone for válido, perguntar se deseja notificar
     if (notificar && telefone) {
       solicitarCompartilhamento(novoPedido, "Seu pedido foi criado:");
     }
@@ -82,7 +85,7 @@ export default function NovoPedidoScreen({ navigation }) {
 
       <Text style={styles.label}>Telefone</Text>
       <MaskedTextInput
-        mask="+99(99) 99999-9999"
+        mask="(99) 99999-9999" // O usuário só precisa preencher o DDD e o número
         placeholder="Telefone"
         keyboardType="numeric"
         value={telefone}
