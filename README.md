@@ -20,3 +20,16 @@ Run the app:
 `npx expo start`
 
 (use "`npx expo start -c`" to clean data cache from app)
+
+
+#### Tela inicial com lista de pedidos.
+![TelaInicial](https://github.com/user-attachments/assets/0148d03a-efd1-458b-b6bc-22b4be595671)
+
+
+#### Criar, Concluir e Notificar Pedido.
+![CriarConcluirNotificar-Pedido](https://github.com/user-attachments/assets/a830cc96-e67c-4dc8-9ab6-07ee1b6bc482)
+
+
+#### Itens e Configurações
+![Itens-Configuracao](https://github.com/user-attachments/assets/185e9429-3888-4081-8003-30d04f022367)
+
