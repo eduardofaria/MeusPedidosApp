@@ -1,5 +1,5 @@
 ## Meus Pedidos App 📱
-(React Native com / Expo)
+(React Native / Expo)
 
 É um App fácil e gratuito para gerenciar uma fila de pedidos e notificar os clientes de pequenos negócios e vendedores informais por WhatsApp/SMS quando o pedido está pronto.
 
